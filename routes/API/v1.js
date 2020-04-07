@@ -4,7 +4,7 @@ var cors = require ('cors');
 var router = express.Router();
 router.use(cors());
 
-let dbConfig = require('../database_config');
+let dbConfig = require('../../db_conf');
 const MongoClient = require('mongodb').MongoClient;
 
 router.get('/',(req, res) => {
@@ -17,9 +17,7 @@ router.get('/summary', (req, res) => {
 
     //console.log(dbConfig);
 
-    MongoClient.connect(dbConfig.url, {
-        useNewUrlParser: true
-    }).then(client => {
+    MongoClient.connect(dbConfig.url, dbConfig.client_options).then(client => {
         let db = client.db(dbConfig.dbname);
         let releases = db.collection('edca_releases');
         let totalAmount = db.collection('edca_contracts_total');
@@ -66,9 +64,7 @@ router.get('/summary', (req, res) => {
 });
 
 router.get('/buyers', (req,res) => {
-    MongoClient.connect(dbConfig.url,{
-        useNewUrlParser: true
-    }).then( client => {
+    MongoClient.connect(dbConfig.url,dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname);
         const releases = db.collection('edca_releases');
         releases.distinct('buyer').then(data => {
@@ -103,9 +99,7 @@ router.post('/search', (req, res)=> {
     }
 
 
-    MongoClient.connect(dbConfig.url,{
-        useNewUrlParser: true
-    }).then( client => {
+    MongoClient.connect(dbConfig.url,dbConfig.client_options).then( client => {
 
         let db = client.db(dbConfig.dbname);
         let collection = db.collection('edca_releases');
@@ -175,9 +169,7 @@ router.get('/releases/:ocid', (req, res) => {
 
     const ocid = req.params.ocid;
 
-    MongoClient.connect(dbConfig.url,{
-        useNewUrlParser: true
-    }).then( client => {
+    MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname);
 
 
@@ -211,9 +203,7 @@ router.get('/top/:n/buyers', (req, res)=> {
     }
 
 
-    MongoClient.connect(dbConfig.url, {
-        useNewUrlParser: true
-    }).then( client => {
+    MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname);
 
         db.collection('edca_buyers_amounts').find({}, {limit: n}).sort({total: -1}).toArray((error, data)=> {
@@ -240,9 +230,7 @@ router.get('/top/:n/suppliers', (req, res)=> {
     }
 
 
-    MongoClient.connect(dbConfig.url, {
-        useNewUrlParser: true
-    }).then( client => {
+    MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname);
 
         db.collection('edca_awards_suppliers').find({}, {limit: n}).sort({"data.total": -1}).toArray((error, data)=> {
@@ -253,9 +241,7 @@ router.get('/top/:n/suppliers', (req, res)=> {
 
 
 router.get('/cycles', (req, res) => {
-    MongoClient.connect(dbConfig.url, {
-        useNewUrlParser: true
-    }).then( client => {
+    MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
 
         const db = client.db(dbConfig.dbname);
 

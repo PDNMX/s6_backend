@@ -2,7 +2,7 @@ const host = process.env.MONGODB_HOST || 'localhost';
 const port = process.env.MONGODB_PORT || 27017;
 const user = process.env.MONGODB_USER;
 const password = process.env.MONGODB_PASSWORD;
-const dbName = process.env.MONGODB_DBNAME || 'oaxaca';
+const dbName = process.env.MONGODB_DBNAME || 'contrataciones';
 
 let credentials = '';
 
@@ -18,5 +18,6 @@ const client_options = {
 
 module.exports = {
     url,
-    client_options
+    client_options,
+    dbName
 };
