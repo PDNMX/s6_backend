@@ -8,6 +8,7 @@ let dbConfig = require('../../db_conf');
 const MongoClient = require('mongodb').MongoClient;
 
 router.get('/',(req, res) => {
+    console.log(process.env)
     res.json({
         version: 1.0
     });
