@@ -84,7 +84,13 @@ router.post('/search', (req, res)=> {
 
     let pageSize = req.body.pageSize || MAX_RESULTS;
     let page = req.body.page || 0;
-    let {contract_title, ocid, buyer_id, procurementMethod, supplierName, tender_title, cycle} = req.body;
+    let {contract_title,
+        ocid,
+        buyer_id,
+        procurementMethod,
+        supplierName,
+        tender_title,
+        cycle} = req.body;
 
     if (isNaN(page)){
         page = 0;
@@ -193,16 +199,13 @@ router.get('/top/:n/buyers', (req, res)=> {
 
     if (isNaN(n)){
         n = 10;
-    }else {
+    } else {
         n = Math.abs(n);
     }
-
-    //console.log(n);
 
     if (n > 200){
         n = 10;
     }
-
 
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname);
@@ -220,7 +223,7 @@ router.get('/top/:n/suppliers', (req, res)=> {
 
     if (isNaN(n)){
         n = 10;
-    }else {
+    } else {
         n = Math.abs(n);
     }
 
