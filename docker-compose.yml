@@ -1,10 +1,25 @@
 version: '3'
+
+volumes:
+  mongo_data:
+
 services:
+  mongo:
+    image: mongo:4-bionic
+    restart: always
+    volumes:
+      - 'mongo_data:/data/db'
+    command: mongod --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root1
+      MONGO_INITDB_ROOT_PASSWORD: toor
+      MONGO_INITDB_DATABASE: ${MONGODB_DBNAME}
+  
   api:
     build:
       context: ./
       dockerfile: Dockerfile
     restart: always
-    network_mode: host
     ports:
       - ${PORT}:${PORT}
+

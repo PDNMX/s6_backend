@@ -9,7 +9,8 @@ let credentials = '';
 if (typeof user !== 'undefined' && user !== '') {
     credentials = `${user}:${password}@`;
 }
-const url = `mongodb://${credentials}${host}:${port}/${dbName}`;
+const url = `mongodb://${credentials}${host}:${port}/${dbName}?authSource=admin`;
+//console.log(url);
 
 const client_options = {
     useUnifiedTopology: true,
