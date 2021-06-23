@@ -6,6 +6,7 @@ router.use(cors());
 
 let dbConfig = require('../../db_conf');
 const MongoClient = require('mongodb').MongoClient;
+const suppliers = require('../../suppliers.json')
 
 router.get('/',(req, res) => {
     console.log(process.env)
@@ -17,20 +18,27 @@ router.get('/',(req, res) => {
 router.get('/summary', (req, res) => {
 
     //console.log(dbConfig);
+    const apf = suppliers[0];
+    const {collections} = apf;
 
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then(client => {
-        let db = client.db(dbConfig.dbname);
-        let releases = db.collection('edca_releases');
-        let totalAmount = db.collection('edca_contracts_total');
-        let contracts_amounts = db.collection("edca_contracts_amounts");
+        let db = client.db(dbConfig.dbname); //
+        //console.log(collections)
+
+        let releases = db.collection(collections.releases);
+        let buyers = db.collection(collections.buyers);
+        let totalAmount = db.collection(collections.agg_contracts_total);
+        let contracts_amounts = db.collection(collections.agg_contracts_procurement_method);
 
         let queries  = [
             releases.countDocuments(),
-            releases.distinct("buyer.name"),
+            buyers.countDocuments(),
+            // simplify to one query => filter
             releases.countDocuments({"tender.procurementMethod": { $regex: "open", $options: "i"}}),
             releases.countDocuments({"tender.procurementMethod": { $regex: "selective", $options: "i"}}),
             releases.countDocuments({"tender.procurementMethod": { $regex: "direct", $options: "i"}}),
             totalAmount.findOne(),
+            // simplify: one query => filter
             contracts_amounts.findOne({'_id': 'open'}),
             contracts_amounts.findOne({'_id': 'selective'}),
             contracts_amounts.findOne({'_id': 'direct'}),
@@ -41,7 +49,7 @@ router.get('/summary', (req, res) => {
             //console.log(d);
             res.json({
                 procedimientos: d[0],
-                instituciones: d[1].length,
+                instituciones: d[1],
                 counts: {
                     open: d[2],
                     selective: d[3],
@@ -65,13 +73,16 @@ router.get('/summary', (req, res) => {
 });
 
 router.get('/buyers', (req,res) => {
+
+    const apf = suppliers[0];
+    const {collections} = apf;
+
     MongoClient.connect(dbConfig.url,dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname);
-        const releases = db.collection('edca_releases');
-        releases.distinct('buyer').then(data => {
+        const buyers = db.collection(collections.buyers);
+        buyers.find().toArray().then(data => {
             res.json(data)
-        })
-
+        }); //catch
     });
 
 });
@@ -79,8 +90,11 @@ router.get('/buyers', (req,res) => {
 
 router.post('/search', (req, res)=> {
     const MAX_RESULTS = 10;
-
     console.log(req.body);
+
+    //get supplier.id from query
+    const apf = suppliers[0];
+    const {collections} = apf;
 
     let pageSize = req.body.pageSize || MAX_RESULTS;
     let page = req.body.page || 0;
@@ -109,7 +123,7 @@ router.post('/search', (req, res)=> {
     MongoClient.connect(dbConfig.url,dbConfig.client_options).then( client => {
 
         let db = client.db(dbConfig.dbname);
-        let collection = db.collection('edca_releases');
+        let collection = db.collection(collections.releases);
 
         let query = {
         };
@@ -176,14 +190,17 @@ router.get('/releases/:ocid', (req, res) => {
 
     const ocid = req.params.ocid;
 
+    const apf = suppliers[0];
+    const {collections} = apf;
+
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname);
 
 
-        db.collection('edca_releases').find({ocid: ocid}).toArray((error, data) => {
+        db.collection(collections.releases).find({ocid: ocid}).toArray((error, data) => {
             //res.json(data);
 
-            const text=JSON.stringify(data, null, 4);
+            const text = JSON.stringify(data, null, 4);
             res.setHeader('Content-type', "application/octet-stream");
             res.setHeader('Content-disposition', 'attachment; filename='+ocid+'.json');
 
@@ -207,10 +224,13 @@ router.get('/top/:n/buyers', (req, res)=> {
         n = 10;
     }
 
+    const apf = suppliers[0];
+    const {collections} = apf;
+
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname);
 
-        db.collection('edca_buyers_amounts').find({}, {limit: n}).sort({total: -1}).toArray((error, data)=> {
+        db.collection(collections.agg_contracts_buyer).find({}, {limit: n}).sort({total: -1}).toArray((error, data)=> {
             res.json(data);
         });
     });
@@ -233,11 +253,13 @@ router.get('/top/:n/suppliers', (req, res)=> {
         n = 10;
     }
 
+    const apf = suppliers[0];
+    const {collections} = apf;
 
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
-        const db = client.db(dbConfig.dbname);
+        const db = client.db(dbConfig.dbname); //
 
-        db.collection('edca_awards_suppliers').find({}, {limit: n}).sort({"data.total": -1}).toArray((error, data)=> {
+        db.collection(collections.agg_awards_suppliers).find({}, {limit: n}).sort({"data.total": -1}).toArray((error, data)=> {
             res.json(data);
         });
     });
@@ -245,11 +267,15 @@ router.get('/top/:n/suppliers', (req, res)=> {
 
 
 router.get('/cycles', (req, res) => {
+
+    const apf = suppliers[0];
+    const {collections} = apf;
+
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
 
-        const db = client.db(dbConfig.dbname);
+        const db = client.db(dbConfig.dbname); //
 
-        db.collection('edca_releases').distinct('cycle').then( data => {
+        db.collection(collections.releases).distinct('cycle').then( data => {
             res.json(data.sort().reverse());
         });
     });

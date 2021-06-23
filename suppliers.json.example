@@ -1,0 +1,16 @@
+[
+  {
+    "id": "SHCP",
+    "db_name": "edca",
+    "collections": {
+      "releases": "apf_releases",
+      "buyers": "apf_buyers",
+      "parties": "apf_parties",
+      "agg_contracts_total": "apf_contracts_total",
+      "agg_contracts_procurement_method": "apf_contracts_procurement_method",
+      "agg_contracts_ocid": "apf_contracts_ocid",
+      "agg_contracts_buyer": "apf_contracts_buyer",
+      "agg_awards_suppliers": "apf_awards_suppliers"
+    }
+  }
+]
