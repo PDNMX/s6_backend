@@ -18,8 +18,13 @@ router.get('/',(req, res) => {
 router.get('/summary', (req, res) => {
 
     //console.log(dbConfig);
-    const apf = suppliers[0];
-    const {collections} = apf;
+    const {supplier_id} = req.body;
+
+    let supplier = suppliers[0];
+    if (typeof supplier_id !== "undefined" && supplier_id === null){
+        supplier = suppliers.find(s => s.id === supplier_id);
+    }
+    const {collections} = supplier;
 
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then(client => {
         let db = client.db(dbConfig.dbname); //
@@ -74,8 +79,13 @@ router.get('/summary', (req, res) => {
 
 router.get('/buyers', (req,res) => {
 
-    const apf = suppliers[0];
-    const {collections} = apf;
+    const {supplier_id} = req.body;
+
+    let supplier = suppliers[0];
+    if (typeof supplier_id !== "undefined" && supplier_id === null){
+        supplier = suppliers.find(s => s.id === supplier_id);
+    }
+    const {collections} = supplier;
 
     MongoClient.connect(dbConfig.url,dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname);
@@ -93,8 +103,11 @@ router.post('/search', (req, res)=> {
     console.log(req.body);
 
     //get supplier.id from query
-    const apf = suppliers[0];
-    const {collections} = apf;
+    let supplier = suppliers[0];
+    if (typeof supplier_id !== "undefined" && supplier_id === null){
+        supplier = suppliers.find(s => s.id === supplier_id);
+    }
+    const {collections} = supplier;
 
     let pageSize = req.body.pageSize || MAX_RESULTS;
     let page = req.body.page || 0;
@@ -190,8 +203,11 @@ router.get('/releases/:ocid', (req, res) => {
 
     const ocid = req.params.ocid;
 
-    const apf = suppliers[0];
-    const {collections} = apf;
+    let supplier = suppliers[0];
+    if (typeof supplier_id !== "undefined" && supplier_id === null){
+        supplier = suppliers.find(s => s.id === supplier_id);
+    }
+    const {collections} = supplier;
 
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname);
@@ -224,8 +240,11 @@ router.get('/top/:n/buyers', (req, res)=> {
         n = 10;
     }
 
-    const apf = suppliers[0];
-    const {collections} = apf;
+    let supplier = suppliers[0];
+    if (typeof supplier_id !== "undefined" && supplier_id === null){
+        supplier = suppliers.find(s => s.id === supplier_id);
+    }
+    const {collections} = supplier;
 
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname);
@@ -253,8 +272,11 @@ router.get('/top/:n/suppliers', (req, res)=> {
         n = 10;
     }
 
-    const apf = suppliers[0];
-    const {collections} = apf;
+    let supplier = suppliers[0];
+    if (typeof supplier_id !== "undefined" && supplier_id === null){
+        supplier = suppliers.find(s => s.id === supplier_id);
+    }
+    const {collections} = supplier;
 
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
         const db = client.db(dbConfig.dbname); //
@@ -268,8 +290,11 @@ router.get('/top/:n/suppliers', (req, res)=> {
 
 router.get('/cycles', (req, res) => {
 
-    const apf = suppliers[0];
-    const {collections} = apf;
+    let supplier = suppliers[0];
+    if (typeof supplier_id !== "undefined" && supplier_id === null){
+        supplier = suppliers.find(s => s.id === supplier_id);
+    }
+    const {collections} = supplier;
 
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
 
