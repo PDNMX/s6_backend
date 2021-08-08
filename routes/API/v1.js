@@ -18,11 +18,11 @@ router.get('/',(req, res) => {
 router.get('/summary', (req, res) => {
 
     //console.log(dbConfig);
-    const {supplier_id} = req.body;
+    const {supplier_id} = req.query;
 
     let supplier = suppliers[0];
-    if (typeof supplier_id !== "undefined" && supplier_id === null){
-        supplier = suppliers.find(s => s.id === supplier_id);
+    if (typeof supplier_id !== "undefined" && supplier_id !== null){
+        //supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
@@ -79,11 +79,11 @@ router.get('/summary', (req, res) => {
 
 router.get('/buyers', (req,res) => {
 
-    const {supplier_id} = req.body;
+    const {supplier_id} = req.query;
 
     let supplier = suppliers[0];
-    if (typeof supplier_id !== "undefined" && supplier_id === null){
-        supplier = suppliers.find(s => s.id === supplier_id);
+    if (typeof supplier_id !== "undefined" && supplier_id !== null){
+        //supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
@@ -100,12 +100,13 @@ router.get('/buyers', (req,res) => {
 
 router.post('/search', (req, res)=> {
     const MAX_RESULTS = 10;
-    console.log(req.body);
 
     //get supplier.id from query
+    const {supplier_id} = req.query;
+
     let supplier = suppliers[0];
-    if (typeof supplier_id !== "undefined" && supplier_id === null){
-        supplier = suppliers.find(s => s.id === supplier_id);
+    if (typeof supplier_id !== "undefined" && supplier_id !== null){
+        //supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
@@ -201,11 +202,12 @@ router.post('/search', (req, res)=> {
 
 router.get('/releases/:ocid', (req, res) => {
 
-    const ocid = req.params.ocid;
+    const {ocid} = req.params;
+    const {supplier_id} = req.query;
 
     let supplier = suppliers[0];
-    if (typeof supplier_id !== "undefined" && supplier_id === null){
-        supplier = suppliers.find(s => s.id === supplier_id);
+    if (typeof supplier_id !== "undefined" && supplier_id !== null){
+        //supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
@@ -229,6 +231,7 @@ router.get('/releases/:ocid', (req, res) => {
 router.get('/top/:n/buyers', (req, res)=> {
 
     let {n} = req.params;
+    const {supplier_id} = req.query;
 
     if (isNaN(n)){
         n = 10;
@@ -241,8 +244,8 @@ router.get('/top/:n/buyers', (req, res)=> {
     }
 
     let supplier = suppliers[0];
-    if (typeof supplier_id !== "undefined" && supplier_id === null){
-        supplier = suppliers.find(s => s.id === supplier_id);
+    if (typeof supplier_id !== "undefined" && supplier_id !== null){
+        //supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
@@ -259,6 +262,7 @@ router.get('/top/:n/buyers', (req, res)=> {
 router.get('/top/:n/suppliers', (req, res)=> {
 
     let {n} = req.params;
+    const {supplier_id} = req.query;
 
     if (isNaN(n)){
         n = 10;
@@ -273,8 +277,8 @@ router.get('/top/:n/suppliers', (req, res)=> {
     }
 
     let supplier = suppliers[0];
-    if (typeof supplier_id !== "undefined" && supplier_id === null){
-        supplier = suppliers.find(s => s.id === supplier_id);
+    if (typeof supplier_id !== "undefined" && supplier_id !== null){
+        //supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
@@ -290,10 +294,13 @@ router.get('/top/:n/suppliers', (req, res)=> {
 
 router.get('/cycles', (req, res) => {
 
+    const {supplier_id} = req.query;
     let supplier = suppliers[0];
-    if (typeof supplier_id !== "undefined" && supplier_id === null){
-        supplier = suppliers.find(s => s.id === supplier_id);
+
+    if (typeof supplier_id !== "undefined" && supplier_id !== null){
+        //supplier = suppliers.find(s => s.id === supplier_id);
     }
+
     const {collections} = supplier;
 
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then( client => {
