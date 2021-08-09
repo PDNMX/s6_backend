@@ -22,7 +22,7 @@ router.get('/summary', (req, res) => {
 
     let supplier = suppliers[0];
     if (typeof supplier_id !== "undefined" && supplier_id !== null){
-        //supplier = suppliers.find(s => s.id === supplier_id);
+        supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
@@ -83,7 +83,7 @@ router.get('/buyers', (req,res) => {
 
     let supplier = suppliers[0];
     if (typeof supplier_id !== "undefined" && supplier_id !== null){
-        //supplier = suppliers.find(s => s.id === supplier_id);
+        supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
@@ -182,7 +182,6 @@ router.post('/search', (req, res)=> {
             skip : page * pageSize,
         };
 
-
         collection.countDocuments(query).then ( count => {
             //res.json(count)
             collection.find(query, options).toArray((error, data) => {
@@ -207,7 +206,7 @@ router.get('/releases/:ocid', (req, res) => {
 
     let supplier = suppliers[0];
     if (typeof supplier_id !== "undefined" && supplier_id !== null){
-        //supplier = suppliers.find(s => s.id === supplier_id);
+        supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
@@ -245,7 +244,7 @@ router.get('/top/:n/buyers', (req, res)=> {
 
     let supplier = suppliers[0];
     if (typeof supplier_id !== "undefined" && supplier_id !== null){
-        //supplier = suppliers.find(s => s.id === supplier_id);
+        supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
@@ -278,7 +277,7 @@ router.get('/top/:n/suppliers', (req, res)=> {
 
     let supplier = suppliers[0];
     if (typeof supplier_id !== "undefined" && supplier_id !== null){
-        //supplier = suppliers.find(s => s.id === supplier_id);
+        supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
@@ -298,7 +297,7 @@ router.get('/cycles', (req, res) => {
     let supplier = suppliers[0];
 
     if (typeof supplier_id !== "undefined" && supplier_id !== null){
-        //supplier = suppliers.find(s => s.id === supplier_id);
+        supplier = suppliers.find(s => s.id === supplier_id);
     }
 
     const {collections} = supplier;
