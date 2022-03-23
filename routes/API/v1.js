@@ -180,10 +180,10 @@ router.post('/search', (req, res)=> {
         let options = {
             limit : pageSize,
             skip : page * pageSize,
-            sort: { date: -1}
+            sort: { cycle: -1, date: -1}
         };
 
-        collection.countDocuments(query).then ( count => {
+        collection.countDocuments(query).then( count => {
             //res.json(count)
             collection.find(query, options).toArray((error, data) => {
                 res.json ({
