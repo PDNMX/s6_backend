@@ -20,10 +20,14 @@ router.get('/summary', (req, res) => {
     //console.log(dbConfig);
     const {supplier_id} = req.query;
 
+    //console.log(supplier_id);
+
     let supplier = suppliers[0];
     if (typeof supplier_id !== "undefined" && supplier_id !== null){
         supplier = suppliers.find(s => s.id === supplier_id);
     }
+
+    //console.log(supplier)
     const {collections} = supplier;
 
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then(client => {
@@ -62,11 +66,11 @@ router.get('/summary', (req, res) => {
                     other: (d[0] - (d[2] + d[3] + d[4])),
                 },
                 amounts: {
-                    total: d[5].total,
-                    open: d[6].total,
-                    selective: d[7].total,
-                    direct: d[8].total,
-                    other: d[9].total
+                    total:     d[5].total,
+                    open:      d[6] ? d[6].total : 0,
+                    selective: d[7] ? d[7].total : 0,
+                    direct:    d[8] ? d[8].total : 0,
+                    other:     d[9] ? d[9].total : 0
                 }
             })
         });
@@ -106,7 +110,7 @@ router.post('/search', (req, res)=> {
 
     let supplier = suppliers[0];
     if (typeof supplier_id !== "undefined" && supplier_id !== null){
-        //supplier = suppliers.find(s => s.id === supplier_id);
+        supplier = suppliers.find(s => s.id === supplier_id);
     }
     const {collections} = supplier;
 
