@@ -118,7 +118,8 @@ router.post('/search', (req, res)=> {
     let page = req.body.page || 0;
     let {contract_title,
         ocid,
-        buyer_id,
+        //buyer_id,
+        buyer_name,
         procurementMethod,
         supplierName,
         tender_title,
@@ -146,8 +147,10 @@ router.post('/search', (req, res)=> {
         let query = {
         };
 
-        if (typeof buyer_id !== 'undefined'){
-            query["buyer.id"] = buyer_id ;
+        //if (typeof buyer_id !== 'undefined'){
+        if (typeof buyer_name !== 'undefined'){
+            //query["buyer.id"] = buyer_id ; // cambiar por buyer name
+            query["buyer.name"] = {$regex: buyer_name, $options: 'i'};
         }
 
         if (typeof procurementMethod !== 'undefined'){
