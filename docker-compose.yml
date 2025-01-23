@@ -1,5 +1,4 @@
-version: '3'
-
+name: s6-backend
 volumes:
   mongo_data:
 
