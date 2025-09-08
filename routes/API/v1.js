@@ -28,57 +28,112 @@ router.get('/summary', (req, res) => {
     }
 
     //console.log(supplier)
+
+    if (!supplier) {
+        return res.status(404).json({
+            error: 'Supplier not found',
+            message: `Supplier with id ${supplier_id} not found`
+        });
+    }
+
     const {collections} = supplier;
 
+    // Verificar que las colecciones estén definidas
+    if (!collections) {
+        return res.status(500).json({
+            error: 'Collections not configured',
+            message: 'No collections configuration found for this supplier'
+        });
+    }
+
     MongoClient.connect(dbConfig.url, dbConfig.client_options).then(client => {
-        let db = client.db(dbConfig.dbname); //
-        //console.log(collections)
+        let db = client.db(dbConfig.dbname);
+   //console.log(collections)
+        // Función auxiliar para ejecutar consulta de manera segura
+        const safeQuery = async (collectionName, queryFn) => {
+            if (!collectionName) {
+                return queryFn.name === 'countDocuments' ? 0 : null;
+            }
+            
+            try {
+                const collection = db.collection(collectionName);
+                return await queryFn(collection);
+            } catch (error) {
+                console.log(`Error in collection ${collectionName}:`, error.message);
+                return queryFn.name === 'countDocuments' ? 0 : null;
+            }
+        };
 
-        let releases = db.collection(collections.releases);
-        let buyers = db.collection(collections.buyers);
-        let totalAmount = db.collection(collections.agg_contracts_total);
-        let contracts_amounts = db.collection(collections.agg_contracts_procurement_method);
+        // Definir las consultas como funciones
+        const countAll = (col) => col.countDocuments();
+        const countOpen = (col) => col.countDocuments({"tender.procurementMethod": { $regex: "open", $options: "i"}});
+        const countSelective = (col) => col.countDocuments({"tender.procurementMethod": { $regex: "selective", $options: "i"}});
+        const countDirect = (col) => col.countDocuments({"tender.procurementMethod": { $regex: "direct", $options: "i"}});
+        const findOneTotal = (col) => col.findOne();
+        const findOpen = (col) => col.findOne({'_id': 'open'});
+        const findSelective = (col) => col.findOne({'_id': 'selective'});
+        const findDirect = (col) => col.findOne({'_id': 'direct'});
+        const findOther = (col) => col.findOne({'_id': null});
 
-        let queries  = [
-            releases.countDocuments(),
-            buyers.countDocuments(),
-            // simplify to one query => filter
-            releases.countDocuments({"tender.procurementMethod": { $regex: "open", $options: "i"}}),
-            releases.countDocuments({"tender.procurementMethod": { $regex: "selective", $options: "i"}}),
-            releases.countDocuments({"tender.procurementMethod": { $regex: "direct", $options: "i"}}),
-            totalAmount.findOne(),
-            // simplify: one query => filter
-            contracts_amounts.findOne({'_id': 'open'}),
-            contracts_amounts.findOne({'_id': 'selective'}),
-            contracts_amounts.findOne({'_id': 'direct'}),
-            contracts_amounts.findOne({'_id': null}),
-        ];
+        Promise.all([
+            safeQuery(collections.releases, countAll),                    // d[0] - procedimientos
+            safeQuery(collections.buyers, countAll),                     // d[1] - instituciones
+            safeQuery(collections.releases, countOpen),                  // d[2] - open
+            safeQuery(collections.releases, countSelective),             // d[3] - selective
+            safeQuery(collections.releases, countDirect),                // d[4] - direct
+            safeQuery(collections.agg_contracts_total, findOneTotal),    // d[5] - total amount
+            safeQuery(collections.agg_contracts_procurement_method, findOpen),      // d[6] - open amount
+            safeQuery(collections.agg_contracts_procurement_method, findSelective), // d[7] - selective amount
+            safeQuery(collections.agg_contracts_procurement_method, findDirect),    // d[8] - direct amount
+            safeQuery(collections.agg_contracts_procurement_method, findOther)      // d[9] - other amount
+        ]).then(d => {
+            
+            const safeTotal = (obj) => obj && typeof obj.total === 'number' ? obj.total : 0;
+            const safeCount = (count) => typeof count === 'number' ? count : 0;
 
-        Promise.all(queries).then( d => {
-            //console.log(d);
+            const procedimientos = safeCount(d[0]);
+            const open = safeCount(d[2]);
+            const selective = safeCount(d[3]);
+            const direct = safeCount(d[4]);
+
             res.json({
-                procedimientos: d[0],
-                instituciones: d[1],
+                procedimientos: procedimientos,
+                instituciones: safeCount(d[1]),
                 counts: {
-                    open: d[2],
-                    selective: d[3],
-                    direct: d[4],
-                    other: (d[0] - (d[2] + d[3] + d[4])),
+                    open: open,
+                    selective: selective,
+                    direct: direct,
+                    other: Math.max(0, procedimientos - (open + selective + direct))
                 },
                 amounts: {
-                    total:     d[5].total,
-                    open:      d[6] ? d[6].total : 0,
-                    selective: d[7] ? d[7].total : 0,
-                    direct:    d[8] ? d[8].total : 0,
-                    other:     d[9] ? d[9].total : 0
+                    total: safeTotal(d[5]),
+                    open: safeTotal(d[6]),
+                    selective: safeTotal(d[7]),
+                    direct: safeTotal(d[8]),
+                    other: safeTotal(d[9])
                 }
-            })
+            });
+
+            client.close();
+
+        }).catch(error => {
+            console.error('Error executing queries:', error);
+            client.close();
+            res.status(500).json({
+                error: 'Database query error',
+                message: 'Error executing database queries',
+                details: error.message
+            });
         });
 
     }).catch(error => {
-        console.log(error)
-    })
-
+        console.error('Error de conexión a base de datos:', error);
+        res.status(500).json({
+            error: 'Error de conexión a base de datos',
+            message: 'No se pudo conectar a la base de datos',
+            details: error.message
+        });
+    });
 });
 
 router.get('/buyers', (req,res) => {
